@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 
 	"github.com/mercul3s/work_sample/format"
 )
@@ -51,14 +52,8 @@ and time format variants you will need to handle.
 
 */
 
-// write a couple tests
-// bonus if you get to it: goreleaser?!
 var fileName string
 
-// accept command line input of filename
-// read in csv file
-// handle error if it occurs - print to stdout
-// generate a new csv file (filename_normalized.csv)
 func main() {
 	// only take the second argument, which should be the filename
 	// and only if it is provided
@@ -72,13 +67,21 @@ func main() {
 	if err != nil {
 		handleFileError(err, fileName)
 	}
-	csvOut := fmt.Sprintf("normalized_" + fileName)
-	fmt.Println("CSV Output filename: ", csvOut)
-	reader := csv.NewReader(bufio.NewReader(csvIn))
-	// todo: make this an optional command line param to write to a file
-	writer := csv.NewWriter(os.Stdout)
 
-	// read through the data until you hit EOF, then write and close the file.
+	_, fName := path.Split(fileName)
+
+	normFileName := fmt.Sprintf("normalized_" + fName)
+	csvOut, err := os.Create(normFileName)
+	if err != nil {
+		handleFileError(err, fileName)
+	}
+
+	fmt.Println("CSV Output filename: ", normFileName)
+
+	reader := csv.NewReader(bufio.NewReader(csvIn))
+	writer := csv.NewWriter(csvOut)
+
+	// read through the data until EOF, then write and close the file.
 	for {
 		row, err := reader.Read()
 		if err == io.EOF {
@@ -95,7 +98,6 @@ func main() {
 			fmt.Printf("Unable to normalize row %s due to error %s - skipping\n", row, err)
 			continue
 		}
-		// write to file here
 		writer.Write(normRow)
 	}
 }

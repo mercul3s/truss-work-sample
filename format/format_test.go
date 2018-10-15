@@ -16,12 +16,12 @@ func TestTime(t *testing.T) {
 		{
 			name:          "correctly parses timestamp as iso-8601",
 			timeString:    "4/1/11 11:00:00 AM",
-			expectedValue: "2011-04-01T11:00:00Z0400",
+			expectedValue: "2011-04-01T11:00:00-0500",
 			expectedError: nil,
 		},
 	}
 	for _, tc := range testCases {
-		result, err := Time(tc.timeString)
+		result, err := parseTime(tc.timeString)
 		assert.Equal(t, tc.expectedValue, result)
 		assert.Equal(t, tc.expectedError, err)
 	}
@@ -48,7 +48,7 @@ func TestZip(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		result, err := Zip(tc.zipString)
+		result, err := zip(tc.zipString)
 		assert.Equal(t, tc.expectedValue, result)
 		compareError(t, tc.expectedError, err)
 	}
@@ -59,26 +59,50 @@ func TestDuration(t *testing.T) {
 	testCases := []struct {
 		name           string
 		durationString string
-		expectedValue  string
+		expectedValue  float32
 		expectedError  bool
 	}{
 		{
 			name:           "parses and returns floating point seconds from HH:MM:SS:MS time string",
 			durationString: "1:23:32.123",
-			expectedValue:  "5012.123",
+			expectedValue:  5012.123,
 			expectedError:  false,
 		},
 		{
 			name:           "returns an error for non-time value",
 			durationString: "hello",
-			expectedValue:  "",
+			expectedValue:  0,
 			expectedError:  true,
 		},
 	}
 	for _, tc := range testCases {
-		result, err := Duration(tc.durationString)
+		result, err := duration(tc.durationString)
 		assert.Equal(t, tc.expectedValue, result)
 		compareError(t, tc.expectedError, err)
+	}
+}
+
+func TestCapitalize(t *testing.T) {
+	testCases := []struct {
+		name          string
+		originalValue string
+		expectedValue string
+	}{
+		{
+			name:          "returns string with first letter capitalized",
+			originalValue: "hello world",
+			expectedValue: "Hello World",
+		},
+		{
+			name:          "returns string with first letter capitalized international",
+			originalValue: "Superman übertan",
+			expectedValue: "Superman Übertan",
+		},
+	}
+
+	for _, tc := range testCases {
+		result := capitalize(tc.originalValue)
+		assert.Equal(t, tc.expectedValue, result)
 	}
 }
 
