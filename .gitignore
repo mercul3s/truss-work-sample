@@ -1,2 +1,4 @@
 normalized_*
 vendor/
+.envrc
+work_sample
